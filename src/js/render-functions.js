@@ -15,7 +15,7 @@ export function refreshGallery() {
 }
 
 export function createGallery(images) {
-  return images
+  const markup = images
     .map(
       ({
         webformatURL,
@@ -45,6 +45,10 @@ export function createGallery(images) {
       }
     )
     .join('');
+
+  galleryEl.insertAdjacentHTML('beforeend', markup);
+
+  refreshGallery();
 }
 
 export function clearGallery() {

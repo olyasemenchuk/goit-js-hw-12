@@ -14,7 +14,6 @@ import {
 const formEl = document.querySelector('.form');
 const input = document.querySelector('input');
 const loadMoreEl = document.querySelector('.load-more-btn');
-const galleryEl = document.querySelector('.gallery');
 
 let page = 1;
 let currentQuery = '';
@@ -22,7 +21,7 @@ let currentQuery = '';
 formEl.addEventListener('submit', formHandler);
 loadMoreEl.addEventListener('click', onLoadMore);
 
-function formHandler(event) {
+async function formHandler(event) {
   event.preventDefault();
 
   const searchText = input.value.trim();
@@ -31,11 +30,11 @@ function formHandler(event) {
     iziToast.warning({
       message: 'Please, enter a search query',
     });
-
     return;
   }
-  currentQuery = searchText;
 
+  currentQuery = searchText;
+  page = 1;
   input.value = '';
 
   showLoader();
@@ -51,15 +50,17 @@ function formHandler(event) {
         return;
       }
 
-      galleryEl.innerHTML = createGallery(data.hits);
-
-      refreshGallery();
+      createGallery(data.hits);
 
       const totalPages = Math.ceil(data.totalHits / 15);
 
-      console.log(page, totalPages);
       if (page < totalPages) {
         showLoadMoreButton();
+      } else {
+        iziToast.error({
+          message: "We're sorry, but you've reached the end of search results.",
+        });
+        hideLoadMoreButton();
       }
     })
     .catch(error => {
@@ -73,12 +74,15 @@ function formHandler(event) {
 }
 
 async function onLoadMore() {
+  showLoader();
+  hideLoadMoreButton();
+
   page++;
 
   try {
     const data = await getImagesByQuery(currentQuery, page);
 
-    galleryEl.insertAdjacentHTML('beforeend', createGallery(data.hits));
+    createGallery(data.hits);
 
     const galleryItem = document.querySelector('.photo-container');
 
@@ -98,10 +102,11 @@ async function onLoadMore() {
       hideLoadMoreButton();
     }
   } catch (error) {
-    console.log(error);
-
     iziToast.error({
       message: 'Something went wrong. Please try again later.',
     });
+  } finally {
+    hideLoader();
+    showLoadMoreButton();
   }
 }
