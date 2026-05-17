@@ -1,9 +1,3 @@
-// У файлі render-functions.js створи екземпляр SimpleLightbox для роботи з модальним вікном та зберігай функції для відображення елементів інтерфейсу:
-
-// createGallery(images). Ця функція повинна приймати масив images, створювати HTML-розмітку для галереї, додавати її в контейнер галереї та викликати метод екземпляра SimpleLightbox refresh(). Нічого не повертає.
-// clearGallery(). Ця функція нічого не приймає та повинна очищати вміст контейнера галереї. Нічого не повертає.
-// showLoader(). Ця функція нічого не приймає, повинна додавати клас для відображення лоадера. Нічого не повертає.
-// hideLoader(). Ця функція нічого не приймає, повинна прибирати клас для відображення лоадера. Нічого не повертає.
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -14,13 +8,14 @@ const lightbox = new SimpleLightbox('.photo-container a', {
 
 const galleryEl = document.querySelector('.gallery');
 const loaderEl = document.querySelector('.loader');
+const loadMoreEl = document.querySelector('.load-more-btn');
 
 export function refreshGallery() {
   lightbox.refresh();
 }
 
 export function createGallery(images) {
-  const markup = images
+  return images
     .map(
       ({
         webformatURL,
@@ -50,9 +45,6 @@ export function createGallery(images) {
       }
     )
     .join('');
-
-  galleryEl.innerHTML = markup;
-  refreshGallery();
 }
 
 export function clearGallery() {
@@ -65,4 +57,11 @@ export function showLoader() {
 
 export function hideLoader() {
   loaderEl.classList.remove('is-visible');
+}
+
+export function showLoadMoreButton() {
+  loadMoreEl.classList.replace('is-hidden', 'is-visible');
+}
+export function hideLoadMoreButton() {
+  loadMoreEl.classList.replace('is-visible', 'is-hidden');
 }
