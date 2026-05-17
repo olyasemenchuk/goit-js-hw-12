@@ -17,6 +17,7 @@ const loadMoreEl = document.querySelector('.load-more-btn');
 
 let page = 1;
 let currentQuery = '';
+let totalPages = 0;
 
 formEl.addEventListener('submit', formHandler);
 loadMoreEl.addEventListener('click', onLoadMore);
@@ -39,38 +40,37 @@ async function formHandler(event) {
 
   showLoader();
   clearGallery();
+  hideLoadMoreButton();
 
-  getImagesByQuery(currentQuery, page)
-    .then(data => {
-      if (data.hits.length === 0) {
-        iziToast.warning({
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-        });
-        return;
-      }
+  try {
+    const data = await getImagesByQuery(currentQuery, page);
 
-      createGallery(data.hits);
-
-      const totalPages = Math.ceil(data.totalHits / 15);
-
-      if (page < totalPages) {
-        showLoadMoreButton();
-      } else {
-        iziToast.error({
-          message: "We're sorry, but you've reached the end of search results.",
-        });
-        hideLoadMoreButton();
-      }
-    })
-    .catch(error => {
-      iziToast.error({
-        message: 'Something went wrong. Please try again later.',
+    if (data.hits.length === 0) {
+      iziToast.warning({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
       });
-    })
-    .finally(() => {
-      hideLoader();
+      return;
+    }
+    createGallery(data.hits);
+
+    totalPages = Math.ceil(data.totalHits / 15);
+
+    if (page < totalPages) {
+      showLoadMoreButton();
+    } else {
+      iziToast.error({
+        message: "We're sorry, but you've reached the end of search results.",
+      });
+      hideLoadMoreButton();
+    }
+  } catch (error) {
+    iziToast.error({
+      message: 'Something went wrong. Please try again later.',
     });
+  } finally {
+    hideLoader();
+  }
 }
 
 async function onLoadMore() {
@@ -107,6 +107,8 @@ async function onLoadMore() {
     });
   } finally {
     hideLoader();
-    showLoadMoreButton();
+    if (page < totalPages) {
+      showLoadMoreButton();
+    }
   }
 }
